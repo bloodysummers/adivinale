@@ -23,7 +23,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.bloodysummers.adivinale"
+      "package": "com.bloodysummers.adivinale",
+      "permissions": ["android.permission.VIBRATE"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

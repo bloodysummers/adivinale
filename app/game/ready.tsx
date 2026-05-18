@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore } from '../../src/store/gameStore';
 import { useWords } from '../../src/hooks/useWords';
 import { useLandscape } from '../../src/hooks/useLandscape';
+import { playCounter } from '../../src/utils/audio';
 import { colors, spacing, typography } from '../../src/utils/theme';
 
 const STEPS = ['3', '2', '1', '¡Ya!'];
@@ -25,12 +27,22 @@ export default function ReadyScreen() {
     : null;
 
   useEffect(() => {
-    if (!category) return;
+    if (!categoryId) return;
+    if (step === 0) {
+      playCounter();
+    }
+    if (STEPS[step] === '¡Ya!') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 160);
+      setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 320);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
     timerRef.current = setTimeout(tick, 1000);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [step, category]);
+  }, [step, categoryId]);
 
   useEffect(() => {
     if (countdownDone && words && words.length > 0) {

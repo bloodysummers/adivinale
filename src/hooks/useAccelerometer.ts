@@ -22,7 +22,7 @@ export function useAccelerometer({ onTilt, enabled = true }: UseAccelerometerOpt
   useEffect(() => {
     if (!enabled) return;
 
-    Accelerometer.setUpdateInterval(50);
+    Accelerometer.setUpdateInterval(33);
 
     const subscription = Accelerometer.addListener(({ z }) => {
       const now = Date.now();

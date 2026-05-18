@@ -22,7 +22,7 @@ export function useGameTimer({ duration = 60, onExpire, running }: UseGameTimerO
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(id);
-          onExpireRef.current();
+          setTimeout(() => onExpireRef.current(), 0);
           return 0;
         }
         return prev - 1;

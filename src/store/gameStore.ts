@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Category, Word } from '../types';
+import type { Category, RoundWord, Word } from '../types';
 import { shuffle } from '../utils/shuffle';
 
 export type GameStatus = 'idle' | 'countdown' | 'playing' | 'finished';
@@ -10,6 +10,7 @@ interface GameState {
   currentIndex: number;
   score: number;
   status: GameStatus;
+  playedWords: RoundWord[];
   startRound: (category: Category, words: Word[]) => void;
   markCorrect: () => void;
   markSkipped: () => void;
@@ -23,6 +24,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentIndex: 0,
   score: 0,
   status: 'idle',
+  playedWords: [],
 
   startRound: (category, words) => {
     set({
@@ -31,26 +33,29 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentIndex: 0,
       score: 0,
       status: 'playing',
+      playedWords: [],
     });
   },
 
   markCorrect: () => {
-    const { currentIndex, words, score } = get();
+    const { currentIndex, words, score, playedWords } = get();
     const nextIndex = currentIndex + 1;
+    const updated = [...playedWords, { word: words[currentIndex], status: 'correct' as const }];
     if (nextIndex >= words.length) {
-      set({ score: score + 1, currentIndex: nextIndex, status: 'finished' });
+      set({ score: score + 1, currentIndex: nextIndex, status: 'finished', playedWords: updated });
     } else {
-      set({ score: score + 1, currentIndex: nextIndex });
+      set({ score: score + 1, currentIndex: nextIndex, playedWords: updated });
     }
   },
 
   markSkipped: () => {
-    const { currentIndex, words } = get();
+    const { currentIndex, words, playedWords } = get();
     const nextIndex = currentIndex + 1;
+    const updated = [...playedWords, { word: words[currentIndex], status: 'skipped' as const }];
     if (nextIndex >= words.length) {
-      set({ currentIndex: nextIndex, status: 'finished' });
+      set({ currentIndex: nextIndex, status: 'finished', playedWords: updated });
     } else {
-      set({ currentIndex: nextIndex });
+      set({ currentIndex: nextIndex, playedWords: updated });
     }
   },
 
@@ -62,5 +67,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentIndex: 0,
       score: 0,
       status: 'idle',
+      playedWords: [],
     }),
 }));

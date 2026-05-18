@@ -1,10 +1,12 @@
 import { useCallback, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../../src/store/gameStore';
 import { useAccelerometer } from '../../src/hooks/useAccelerometer';
 import { useGameTimer } from '../../src/hooks/useGameTimer';
 import { useLandscape } from '../../src/hooks/useLandscape';
+import { playSkip, playSuccess } from '../../src/utils/audio';
 import { WordDisplay } from '../../src/components/WordDisplay';
 import { Timer } from '../../src/components/Timer';
 import { colors, spacing, typography } from '../../src/utils/theme';
@@ -17,7 +19,6 @@ export default function PlayScreen() {
   const router = useRouter();
   const { words, currentIndex, score, status, markCorrect, markSkipped, endRound } =
     useGameStore((s) => s);
-
   const handleExpire = useCallback(() => {
     endRound();
   }, [endRound]);
@@ -30,8 +31,17 @@ export default function PlayScreen() {
 
   const handleTilt = useCallback(
     (direction: TiltDirection) => {
-      if (direction === 'up') markCorrect();
-      else markSkipped();
+      if (direction === 'up') {
+        playSuccess();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 120);
+        markCorrect();
+      } else {
+        playSkip();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning), 120);
+        markSkipped();
+      }
     },
     [markCorrect, markSkipped]
   );
