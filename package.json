@@ -7,7 +7,16 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "fetch:paises": "tsx db/scripts/fetch-paises.ts",
+    "fetch:anime": "tsx db/scripts/fetch-anime.ts",
+    "fetch:musica": "tsx db/scripts/fetch-musica.ts",
+    "fetch:videojuegos": "tsx db/scripts/fetch-videojuegos.ts",
+    "fetch:peliculas": "tsx db/scripts/fetch-peliculas-series.ts",
+    "fetch:libros": "tsx db/scripts/fetch-libros.ts",
+    "fetch:personajes": "tsx db/scripts/fetch-personajes.ts",
+    "fetch:animales": "tsx db/scripts/fetch-animales.ts",
+    "fetch:arte": "tsx db/scripts/fetch-arte.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -32,6 +41,7 @@
     "jest": "^29.7.0",
     "jest-expo": "^55.0.17",
     "react-test-renderer": "^19.1.0",
+    "tsx": "^4.22.2",
     "typescript": "~5.9.2"
   },
   "private": true

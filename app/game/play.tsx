@@ -61,7 +61,7 @@ export default function PlayScreen() {
         <Text style={styles.scoreText}>✓ {score}</Text>
       </View>
 
-      <WordDisplay word={currentWord.text} />
+      <WordDisplay word={currentWord.text} subtext={currentWord.subtext} />
 
       {IS_DEV && (
         <View style={styles.devButtons}>

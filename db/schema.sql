@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS words (
   id          SERIAL PRIMARY KEY,
   category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   text        TEXT NOT NULL,
-  language    TEXT NOT NULL CHECK (language IN ('es', 'en'))
+  language    TEXT NOT NULL CHECK (language IN ('es', 'en')),
+  subtext     TEXT
 );

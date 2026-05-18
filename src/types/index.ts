@@ -10,6 +10,7 @@ export interface Word {
   categoryId: string;
   text: string;
   language: 'es' | 'en';
+  subtext?: string;
 }
 
 export type WordStatus = 'correct' | 'skipped' | 'pending';

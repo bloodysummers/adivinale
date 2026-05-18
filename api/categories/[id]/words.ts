@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const rows = await sql`
-      SELECT id::text AS id, category_id AS "categoryId", text, language
+      SELECT id::text AS id, category_id AS "categoryId", text, language, subtext
       FROM words
       WHERE category_id = ${id}
       ORDER BY RANDOM()
