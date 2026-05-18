@@ -1,0 +1,22 @@
+schema: spec-driven
+
+context: |
+  See openspec/project.md for full project context.
+
+  Tech stack: Expo SDK 54, TypeScript, Expo Router v4, expo-sensors, Zustand, REST API
+  Domain: mobile party game ("Heads Up" style) — iOS + Android
+  Language: Spanish primary, some categories bilingual ES+EN
+  Conventions: PascalCase components, useCamelCase hooks, StyleSheet.create (no styled-components)
+  State: Zustand store at src/store/gameStore.ts
+  API: all HTTP via src/api/client.ts wrapper; hooks expose { data, error, isLoading }
+  No magic numbers in styles; use constants from src/utils/theme.ts
+
+rules:
+  proposal:
+    - Include affected screens and hooks
+    - List any new dependencies required
+    - Note if the feature touches the accelerometer flow
+  tasks:
+    - Break tasks into chunks completable in one session
+    - Specify the file(s) to create or modify
+    - Mark accelerometer-sensitive tasks explicitly
