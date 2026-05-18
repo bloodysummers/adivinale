@@ -111,6 +111,39 @@ interface RoundWord {
 
 ---
 
+## Base de datos
+
+PostgreSQL en **Neon.tech** (serverless Postgres).
+
+- La app móvil **no se conecta directamente** a la base de datos; toda interacción pasa por la API REST.
+- El backend es el único cliente de Neon.
+- Neon provee una connection string estándar (`postgresql://user:pass@host/db?sslmode=require`) que el backend consume vía variable de entorno `DATABASE_URL`.
+- Se usa el driver estándar de PostgreSQL (`pg` en Node.js o el cliente que provea el backend elegido).
+
+### Esquema inicial
+
+```sql
+CREATE TABLE categories (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug        TEXT UNIQUE NOT NULL,
+  name        TEXT NOT NULL,
+  emoji       TEXT NOT NULL,
+  language    TEXT NOT NULL CHECK (language IN ('es', 'en', 'es+en')),
+  is_premium  BOOLEAN NOT NULL DEFAULT false,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE words (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  category_id  UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  text         TEXT NOT NULL,
+  language     TEXT NOT NULL CHECK (language IN ('es', 'en')),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+---
+
 ## API REST
 
 Base URL: definida en variable de entorno `EXPO_PUBLIC_API_URL`.

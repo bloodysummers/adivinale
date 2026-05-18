@@ -3,7 +3,7 @@ schema: spec-driven
 context: |
   See openspec/project.md for full project context.
 
-  Tech stack: Expo SDK 54, TypeScript, Expo Router v4, expo-sensors, Zustand, REST API
+  Tech stack: Expo SDK 54, TypeScript, Expo Router v4, expo-sensors, Zustand, REST API, PostgreSQL en Neon.tech
   Domain: mobile party game ("Heads Up" style) — iOS + Android
   Language: Spanish primary, some categories bilingual ES+EN
   Conventions: PascalCase components, useCamelCase hooks, StyleSheet.create (no styled-components)
