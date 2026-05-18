@@ -1,0 +1,22 @@
+INSERT INTO words (category_id, text, language) VALUES
+  ('peliculas', 'Titanic', 'en'),
+  ('peliculas', 'El Rey León', 'es'),
+  ('peliculas', 'Avatar', 'en'),
+  ('peliculas', 'Coco', 'es'),
+  ('peliculas', 'Toy Story', 'en'),
+  ('peliculas', 'Interestelar', 'es'),
+  ('peliculas', 'Los Vengadores', 'es'),
+  ('peliculas', 'Shrek', 'en'),
+  ('peliculas', 'Matrix', 'en'),
+  ('peliculas', 'El Padrino', 'es'),
+  ('peliculas', 'Forrest Gump', 'en'),
+  ('peliculas', 'Up', 'en'),
+  ('peliculas', 'La La Land', 'en'),
+  ('peliculas', 'Joker', 'en'),
+  ('peliculas', 'El Señor de los Anillos', 'es'),
+  ('peliculas', 'Harry Potter', 'en'),
+  ('peliculas', 'Spider-Man', 'en'),
+  ('peliculas', 'Rápido y Furioso', 'es'),
+  ('peliculas', 'Frozen', 'en'),
+  ('peliculas', 'Gladiador', 'es')
+ON CONFLICT DO NOTHING;
