@@ -1,5 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { colors, spacing, typography } from '../utils/theme';
+import { StyleSheet, Text as RNText, View } from 'react-native';
+import { useTheme } from '../theme/ThemeProvider';
+import { Text } from './Text';
+import { spacing, typography } from '../utils/theme';
 
 interface WordDisplayProps {
   word: string;
@@ -7,13 +9,24 @@ interface WordDisplayProps {
 }
 
 export function WordDisplay({ word, subtext }: WordDisplayProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.word} adjustsFontSizeToFit numberOfLines={2}>
+      {/*
+        Uses RN's native Text to avoid the design-system Text component adding a
+        body-variant lineHeight (22.5) that would be smaller than the fontSize (38+),
+        clipping characters from top and bottom.
+      */}
+      <RNText
+        style={[styles.word, { color: theme.colors.onBackground }]}
+        adjustsFontSizeToFit
+        numberOfLines={3}
+      >
         {word}
-      </Text>
+      </RNText>
       {subtext ? (
-        <Text style={styles.subtext} adjustsFontSizeToFit numberOfLines={1}>
+        <Text variant="bodySmall" color={theme.colors.onSurfaceSecondary} align="center">
           {subtext}
         </Text>
       ) : null}
@@ -26,18 +39,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    gap: spacing.sm,
+    // Generous vertical padding so the word never touches topBar or devButtons
+    paddingVertical: spacing[6],
+    paddingHorizontal: spacing[8],
+    gap: spacing[2],
   },
   word: {
-    ...typography.word,
-    color: colors.text,
+    fontSize: typography.fontSize['4xl'],
+    fontWeight: typography.fontWeight.extrabold,
     textAlign: 'center',
-  },
-  subtext: {
-    fontSize: 24,
-    fontWeight: '500' as const,
-    color: colors.textSecondary,
-    textAlign: 'center',
+    letterSpacing: 0.5,
+    // No lineHeight — let RN compute the natural leading.
+    // A fixed lineHeight would stay large when adjustsFontSizeToFit shrinks the font,
+    // or stay small when the font is large, causing clipping either way.
   },
 });

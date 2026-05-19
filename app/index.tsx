@@ -1,15 +1,25 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useCategories } from '../src/hooks/useCategories';
 import { CategoryCard } from '../src/components/CategoryCard';
+import { Text } from '../src/components/Text';
+import { ScreenContainer } from '../src/components/ScreenContainer';
 import { useGameStore } from '../src/store/gameStore';
+import { useTheme } from '../src/theme/ThemeProvider';
 import type { Category } from '../src/types';
-import { colors, spacing, typography } from '../src/utils/theme';
+import { spacing } from '../src/utils/theme';
+
+const GRID_GAP = spacing[3];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const { width, height } = useWindowDimensions();
   const resetRound = useGameStore((s) => s.resetRound);
   const { data: categories, error, isLoading } = useCategories();
+
+  const isLandscape = width > height;
+  const numColumns = isLandscape ? 3 : 2;
 
   function handleSelectCategory(category: Category) {
     resetRound();
@@ -19,57 +29,74 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Adivínale</Text>
-      <Text style={styles.subtitle}>Elige una categoría</Text>
+    <ScreenContainer scrollable style={styles.container}>
+      <View style={styles.header}>
+        <Text variant="heading1" color={theme.colors.primary} align="center">
+          Adivínale
+        </Text>
+        <Text variant="body" color={theme.colors.onSurfaceSecondary} align="center">
+          Elige una categoría
+        </Text>
+      </View>
 
-      {isLoading && <ActivityIndicator size="large" color={colors.text} />}
+      {isLoading && (
+        <ActivityIndicator size="large" color={theme.colors.primary} style={styles.loader} />
+      )}
 
       {error && (
-        <Text style={styles.error}>No se pudieron cargar las categorías</Text>
+        <Text variant="body" color={theme.colors.error} align="center" style={styles.error}>
+          No se pudieron cargar las categorías
+        </Text>
       )}
 
       {categories && (
         <FlatList
+          // key forces remount when column count changes (FlatList requires this)
+          key={numColumns}
           data={categories}
           keyExtractor={(item) => item.id}
+          numColumns={numColumns}
+          columnWrapperStyle={styles.row}
           renderItem={({ item }) => (
-            <CategoryCard category={item} onPress={handleSelectCategory} />
+            <CategoryCard
+              category={item}
+              onPress={handleSelectCategory}
+              style={styles.card}
+            />
           )}
           contentContainerStyle={styles.list}
+          scrollEnabled={false}
+          ItemSeparatorComponent={() => <View style={styles.rowGap} />}
         />
       )}
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: spacing.xxl,
-    paddingHorizontal: spacing.md,
+    paddingTop: spacing[6],
   },
-  title: {
-    ...typography.heading,
-    fontSize: 36,
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
+  header: {
+    gap: spacing[2],
+    marginBottom: spacing[6],
   },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  list: {
-    paddingBottom: spacing.xl,
+  loader: {
+    marginTop: spacing[10],
   },
   error: {
-    ...typography.body,
-    color: colors.skip,
-    textAlign: 'center',
-    marginTop: spacing.xl,
+    marginTop: spacing[10],
+  },
+  list: {
+    paddingBottom: spacing[10],
+  },
+  row: {
+    gap: GRID_GAP,
+  },
+  rowGap: {
+    height: GRID_GAP,
+  },
+  card: {
+    flex: 1,
   },
 });

@@ -1,15 +1,20 @@
 import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '../../src/store/gameStore';
 import { useLandscape } from '../../src/hooks/useLandscape';
 import { playGameOver } from '../../src/utils/audio';
-import { colors, spacing, typography } from '../../src/utils/theme';
+import { Text } from '../../src/components/Text';
+import { GameButton } from '../../src/components/GameButton';
+import { ScreenContainer } from '../../src/components/ScreenContainer';
+import { useTheme } from '../../src/theme/ThemeProvider';
+import { spacing, radii } from '../../src/utils/theme';
 
 export default function ResultsScreen() {
   useLandscape();
   const router = useRouter();
+  const { theme } = useTheme();
   const { score, currentIndex, category, playedWords, resetRound } = useGameStore((s) => s);
 
   useEffect(() => {
@@ -32,19 +37,17 @@ export default function ResultsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          {category && (
-            <Text style={styles.categoryName}>
-              {category.emoji} {category.name}
-            </Text>
-          )}
-        </View>
-        <View style={styles.scoreInline}>
-          <Text style={styles.scoreCorrect}>{score}</Text>
-          <Text style={styles.scoreTotal}> / {currentIndex}</Text>
-          <Text style={styles.scoreLabel}> aciertos</Text>
+        {category && (
+          <Text variant="label" color={theme.colors.onSurfaceSecondary} align="center">
+            {category.emoji} {category.name}
+          </Text>
+        )}
+        <View style={styles.scoreRow}>
+          <Text variant="heading1" color={theme.colors.success}>{score}</Text>
+          <Text variant="heading2" color={theme.colors.onSurfaceSecondary}> / {currentIndex}</Text>
+          <Text variant="heading3" color={theme.colors.onSurfaceSecondary}> aciertos</Text>
         </View>
       </View>
 
@@ -53,134 +56,85 @@ export default function ResultsScreen() {
         contentContainerStyle={styles.wordListContent}
         showsVerticalScrollIndicator={false}
       >
-        {playedWords.map((pw, i) => (
-          <View key={pw.word.id ?? i} style={styles.wordRow}>
-            <Text style={pw.status === 'correct' ? styles.iconCorrect : styles.iconSkipped}>
-              {pw.status === 'correct' ? '✓' : '✗'}
-            </Text>
-            <Text style={styles.wordText}>{pw.word.text}</Text>
-            {pw.word.subtext ? (
-              <Text style={styles.wordSubtext}>{pw.word.subtext}</Text>
-            ) : null}
-          </View>
-        ))}
+        {playedWords.map((pw, i) => {
+          const isCorrect = pw.status === 'correct';
+          return (
+            <View
+              key={pw.word.id ?? i}
+              style={[styles.wordRow, { borderBottomColor: theme.colors.border }]}
+            >
+              <Text
+                style={[
+                  styles.icon,
+                  { color: isCorrect ? theme.colors.success : theme.colors.error },
+                ]}
+              >
+                {isCorrect ? '✓' : '✗'}
+              </Text>
+              <Text variant="body" color={theme.colors.onSurface} style={styles.wordText}>
+                {pw.word.text}
+              </Text>
+              {pw.word.subtext ? (
+                <Text variant="caption">{pw.word.subtext}</Text>
+              ) : null}
+            </View>
+          );
+        })}
       </ScrollView>
 
       <View style={styles.buttons}>
-        <Pressable style={[styles.btn, styles.btnPrimary]} onPress={handlePlayAgain}>
-          <Text style={styles.btnText}>Jugar de nuevo</Text>
-        </Pressable>
-        <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handleHome}>
-          <Text style={[styles.btnText, styles.btnTextSecondary]}>Ir al inicio</Text>
-        </Pressable>
+        <View style={styles.btnWrapper}>
+          <GameButton label="Jugar de nuevo" onPress={handlePlayAgain} variant="primary" fullWidth />
+        </View>
+        <View style={styles.btnWrapper}>
+          <GameButton label="Ir al inicio" onPress={handleHome} variant="accent" fullWidth />
+        </View>
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingTop: spacing[4],
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing.sm,
-    gap: spacing.xs,
+    gap: spacing[2],
+    marginBottom: spacing[3],
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-  },
-  categoryName: {
-    ...typography.body,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  scoreInline: {
+  scoreRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: spacing.xs,
-  },
-  scoreCorrect: {
-    ...typography.score,
-    color: colors.correct,
-  },
-  scoreTotal: {
-    ...typography.score,
-    color: colors.textSecondary,
-  },
-  scoreLabel: {
-    ...typography.heading,
-    color: colors.textSecondary,
   },
   wordList: {
     flex: 1,
   },
   wordListContent: {
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing[3],
   },
   wordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
+    gap: spacing[2],
+    paddingVertical: spacing[2],
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.textSecondary + '33',
   },
-  iconCorrect: {
-    ...typography.body,
-    color: colors.correct,
-    fontWeight: '700',
-    width: 20,
-    textAlign: 'center',
-  },
-  iconSkipped: {
-    ...typography.body,
-    color: colors.skip,
+  icon: {
     fontWeight: '700',
     width: 20,
     textAlign: 'center',
   },
   wordText: {
-    ...typography.body,
-    color: colors.text,
     flex: 1,
-  },
-  wordSubtext: {
-    fontSize: 12,
-    color: colors.textSecondary,
   },
   buttons: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.sm,
+    gap: spacing[3],
+    paddingTop: spacing[3],
+    paddingBottom: spacing[2],
   },
-  btn: {
+  btnWrapper: {
     flex: 1,
-    paddingVertical: spacing.md,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  btnPrimary: {
-    backgroundColor: colors.primary,
-  },
-  btnSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  btnText: {
-    ...typography.body,
-    color: colors.text,
-    fontWeight: '700',
-  },
-  btnTextSecondary: {
-    color: colors.primary,
   },
 });

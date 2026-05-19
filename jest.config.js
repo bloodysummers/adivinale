@@ -6,6 +6,7 @@ module.exports = {
       '@react-native(-community)?|' +
       'expo(nent)?|' +
       '@expo(nent)?/.*|' +
+      'expo-linear-gradient|' +
       'expo-router|' +
       'expo-sensors|' +
       'expo-screen-orientation|' +

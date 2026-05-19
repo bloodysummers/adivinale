@@ -1,5 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { colors, spacing, typography } from '../utils/theme';
+import { StyleSheet, View } from 'react-native';
+import { useTheme } from '../theme/ThemeProvider';
+import { Text } from './Text';
+import { spacing } from '../utils/theme';
 
 interface ScoreBoardProps {
   score: number;
@@ -7,12 +9,19 @@ interface ScoreBoardProps {
 }
 
 export function ScoreBoard({ score, total }: ScoreBoardProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.score}>{score}</Text>
-      <Text style={styles.divider}>/</Text>
-      <Text style={styles.total}>{total}</Text>
-      <Text style={styles.label}>aciertos</Text>
+      <Text variant="heading1" color={theme.colors.success} align="center">
+        {score}
+      </Text>
+      <Text variant="heading3" color={theme.colors.onSurfaceSecondary} align="center">
+        / {total}
+      </Text>
+      <Text variant="label" color={theme.colors.onSurfaceSecondary} align="center" style={styles.label}>
+        aciertos
+      </Text>
     </View>
   );
 }
@@ -21,22 +30,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
   },
-  score: {
-    ...typography.score,
-    color: colors.correct,
-  },
-  divider: {
-    ...typography.heading,
-    color: colors.textSecondary,
-    marginVertical: -spacing.sm,
-  },
-  total: {
-    ...typography.score,
-    color: colors.text,
-  },
   label: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.sm,
+    marginTop: spacing[2],
   },
 });

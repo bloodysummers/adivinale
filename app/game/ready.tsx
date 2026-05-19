@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore } from '../../src/store/gameStore';
 import { useWords } from '../../src/hooks/useWords';
 import { useLandscape } from '../../src/hooks/useLandscape';
 import { playCounter } from '../../src/utils/audio';
-import { colors, spacing, typography } from '../../src/utils/theme';
+import { Text } from '../../src/components/Text';
+import { gradients, spacing, typography } from '../../src/utils/theme';
 
 const STEPS = ['3', '2', '1', '¡Ya!'];
 
@@ -28,9 +31,7 @@ export default function ReadyScreen() {
 
   useEffect(() => {
     if (!categoryId) return;
-    if (step === 0) {
-      playCounter();
-    }
+    if (step === 0) playCounter();
     if (STEPS[step] === '¡Ya!') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy), 160);
@@ -39,9 +40,7 @@ export default function ReadyScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     timerRef.current = setTimeout(tick, 1000);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [step, categoryId]);
 
   useEffect(() => {
@@ -53,70 +52,76 @@ export default function ReadyScreen() {
 
   function tick() {
     const next = step + 1;
-    if (next < STEPS.length) {
-      setStep(next);
-    } else {
-      setCountdownDone(true);
-    }
+    if (next < STEPS.length) setStep(next);
+    else setCountdownDone(true);
   }
 
   if (!category) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Categoría no encontrada</Text>
-      </View>
+      <LinearGradient colors={gradients.primary as [string, string]} style={styles.fill}>
+        <SafeAreaView style={styles.fill}>
+          <View style={styles.center}>
+            <Text variant="body" color="#fff">Categoría no encontrada</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Error al cargar palabras. Intenta de nuevo.</Text>
-      </View>
+      <LinearGradient colors={gradients.primary as [string, string]} style={styles.fill}>
+        <SafeAreaView style={styles.fill}>
+          <View style={styles.center}>
+            <Text variant="body" color="#fff">Error al cargar palabras. Intenta de nuevo.</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-      <Text style={styles.categoryName}>{category.name}</Text>
-      <Text style={styles.countdown}>{STEPS[step]}</Text>
-      {countdownDone && isLoading ? (
-        <Text style={styles.hint}>Cargando palabras…</Text>
-      ) : (
-        <Text style={styles.hint}>Pon el teléfono en tu frente</Text>
-      )}
-    </View>
+    <LinearGradient colors={gradients.primary as [string, string]} style={styles.fill}>
+      <SafeAreaView style={styles.fill}>
+        <View style={styles.center}>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.emoji}>{category.emoji}</Text>
+            <Text variant="label" color="rgba(255,255,255,0.85)">{category.name}</Text>
+          </View>
+
+          <Text style={styles.countdown}>{STEPS[step]}</Text>
+
+          <Text variant="bodySmall" color="rgba(255,255,255,0.7)" align="center">
+            {countdownDone && isLoading ? 'Cargando palabras…' : 'Pon el teléfono en tu frente'}
+          </Text>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  fill: {
     flex: 1,
-    backgroundColor: colors.background,
+  },
+  center: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing[4],
   },
-  categoryEmoji: {
+  categoryBadge: {
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  emoji: {
     fontSize: 56,
-  },
-  categoryName: {
-    ...typography.heading,
-    color: colors.textSecondary,
+    lineHeight: 68,
   },
   countdown: {
     fontSize: 96,
-    fontWeight: '900',
-    color: colors.text,
-    marginVertical: spacing.md,
-  },
-  hint: {
-    ...typography.body,
-    color: colors.textSecondary,
-  },
-  error: {
-    ...typography.body,
-    color: colors.skip,
+    fontWeight: typography.fontWeight.extrabold,
+    color: '#fff',
+    lineHeight: 108,
   },
 });

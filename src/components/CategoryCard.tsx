@@ -1,43 +1,166 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import React, { useRef } from 'react';
+import { Animated, Platform, Pressable, StyleSheet, StyleProp, View, ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { Category } from '../types';
-import { colors, spacing, typography } from '../utils/theme';
+import { Text } from './Text';
+import { radii, spacing, typography } from '../utils/theme';
+
+const CARD_GRADIENTS: [string, string][] = [
+  ['#5B4FE8', '#8B70F8'],
+  ['#4ECDC4', '#2EB890'],
+  ['#FF6B6B', '#FF8C42'],
+  ['#F59E0B', '#EF4444'],
+  ['#6366F1', '#8B5CF6'],
+  ['#10B981', '#059669'],
+  ['#EC4899', '#8B5CF6'],
+  ['#3B82F6', '#6366F1'],
+];
+
+// Darker shade per gradient for the bottom "button edge"
+const CARD_EDGES: string[] = [
+  '#3730A3', '#0D9488', '#DC2626', '#B45309',
+  '#4338CA', '#047857', '#BE185D', '#1D4ED8',
+];
+
+function pickIndex(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) & 0xffffffff;
+  return Math.abs(hash) % CARD_GRADIENTS.length;
+}
 
 interface CategoryCardProps {
   category: Category;
   onPress: (category: Category) => void;
+  style?: StyleProp<ViewStyle>;
 }
 
-export function CategoryCard({ category, onPress }: CategoryCardProps) {
+export function CategoryCard({ category, onPress, style }: CategoryCardProps) {
+  const idx = pickIndex(category.id);
+  const gradient = CARD_GRADIENTS[idx];
+  const edgeColor = CARD_EDGES[idx];
+
+  const scale = useRef(new Animated.Value(1)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  function handlePressIn() {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 60 }),
+      Animated.timing(translateY, { toValue: 5, duration: 60, useNativeDriver: true }),
+    ]).start();
+  }
+
+  function handlePressOut() {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 60 }),
+      Animated.timing(translateY, { toValue: 0, duration: 100, useNativeDriver: true }),
+    ]).start();
+  }
+
+  const iosShadow = Platform.OS === 'ios'
+    ? { shadowColor: '#000', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.28, shadowRadius: 8 }
+    : {};
+
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-      onPress={() => onPress(category)}
+    <Animated.View
+      style={[
+        styles.outer,
+        iosShadow,
+        { transform: [{ scale }, { translateY }] },
+        style,
+      ]}
     >
-      <Text style={styles.emoji}>{category.emoji}</Text>
-      <Text style={styles.name}>{category.name}</Text>
-    </Pressable>
+      {/* Bottom edge — gives the "button thickness" illusion */}
+      <View style={[styles.edge, { backgroundColor: edgeColor }]} />
+
+      <Pressable
+        onPress={() => onPress(category)}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={styles.pressable}
+      >
+        <LinearGradient
+          colors={gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
+        >
+          {/* Top sheen for light refraction */}
+          <View style={styles.sheen} />
+
+          <View style={styles.emojiWrapper}>
+            <Text style={styles.emoji}>{category.emoji}</Text>
+          </View>
+          <Text
+            variant="label"
+            color="#fff"
+            align="center"
+            style={styles.name}
+          >
+            {category.name}
+          </Text>
+        </LinearGradient>
+      </Pressable>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: spacing.lg,
-    alignItems: 'center',
-    marginVertical: spacing.sm,
-    width: '100%',
+  outer: {
+    borderRadius: radii.xl,
+    elevation: 8,
   },
-  pressed: {
-    opacity: 0.75,
-    transform: [{ scale: 0.97 }],
+  edge: {
+    // Sits behind the card — its bottom 5px show as the "thick edge"
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    borderRadius: radii.xl,
+  },
+  pressable: {
+    borderRadius: radii.xl,
+    overflow: 'hidden',
+    // Card floats 5px above edge → shows the bottom "thickness"
+    marginBottom: 5,
+  },
+  card: {
+    borderRadius: radii.xl,
+    paddingTop: spacing[4],
+    paddingBottom: spacing[3],
+    paddingHorizontal: spacing[3],
+    alignItems: 'center',
+    gap: spacing[2],
+    minHeight: 108,
+    justifyContent: 'center',
+  },
+  sheen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '45%',
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    backgroundColor: 'rgba(255,255,255,0.13)',
+  },
+  emojiWrapper: {
+    width: 52,
+    height: 52,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderRadius: radii.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 2,
   },
   emoji: {
-    fontSize: 48,
-    marginBottom: spacing.sm,
+    fontSize: 26,
+    lineHeight: 34,
   },
   name: {
-    ...typography.heading,
-    color: colors.text,
+    fontWeight: typography.fontWeight.bold,
+    textShadowColor: 'rgba(0,0,0,0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });

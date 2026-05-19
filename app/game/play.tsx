@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameStore } from '../../src/store/gameStore';
 import { useAccelerometer } from '../../src/hooks/useAccelerometer';
 import { useGameTimer } from '../../src/hooks/useGameTimer';
@@ -9,7 +10,10 @@ import { useLandscape } from '../../src/hooks/useLandscape';
 import { playSkip, playSuccess } from '../../src/utils/audio';
 import { WordDisplay } from '../../src/components/WordDisplay';
 import { Timer } from '../../src/components/Timer';
-import { colors, spacing, typography } from '../../src/utils/theme';
+import { Text } from '../../src/components/Text';
+import { GameButton } from '../../src/components/GameButton';
+import { useTheme } from '../../src/theme/ThemeProvider';
+import { spacing } from '../../src/utils/theme';
 import type { TiltDirection } from '../../src/hooks/useAccelerometer';
 
 const IS_DEV = __DEV__;
@@ -17,11 +21,11 @@ const IS_DEV = __DEV__;
 export default function PlayScreen() {
   useLandscape();
   const router = useRouter();
-  const { words, currentIndex, score, status, markCorrect, markSkipped, endRound } =
-    useGameStore((s) => s);
-  const handleExpire = useCallback(() => {
-    endRound();
-  }, [endRound]);
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { words, currentIndex, score, status, markCorrect, markSkipped, endRound } = useGameStore((s) => s);
+
+  const handleExpire = useCallback(() => endRound(), [endRound]);
 
   const { timeLeft } = useGameTimer({
     duration: 60,
@@ -58,35 +62,39 @@ export default function PlayScreen() {
 
   if (!currentWord) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.fallback}>Cargando...</Text>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Text variant="body" color={theme.colors.onSurfaceSecondary} align="center">
+          Cargando...
+        </Text>
       </View>
     );
   }
 
+  // In landscape, insets apply to left/right (notch sides) — use them for horizontal padding
+  const hPad = Math.max(spacing[6], insets.left + spacing[4]);
+  const topPad = Math.max(spacing[4], insets.top + spacing[2]);
+
   return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.topBar, { paddingHorizontal: hPad, paddingTop: topPad }]}>
         <Timer timeLeft={timeLeft} />
-        <Text style={styles.scoreText}>✓ {score}</Text>
+        <Text style={[styles.scoreText, { color: theme.colors.success }]}>✓ {score}</Text>
       </View>
 
-      <WordDisplay word={currentWord.text} subtext={currentWord.subtext} />
+      {/* WordDisplay takes all remaining vertical space */}
+      <View style={styles.wordArea}>
+        <WordDisplay word={currentWord.text} subtext={currentWord.subtext} />
+      </View>
 
       {IS_DEV && (
-        <View style={styles.devButtons}>
-          <Pressable
-            style={[styles.devBtn, styles.correctBtn]}
-            onPress={markCorrect}
-          >
-            <Text style={styles.devBtnText}>✓ Correcto</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.devBtn, styles.skipBtn]}
-            onPress={markSkipped}
-          >
-            <Text style={styles.devBtnText}>✗ Pasa</Text>
-          </Pressable>
+        <View style={[styles.devButtons, { paddingHorizontal: hPad, paddingBottom: Math.max(spacing[4], insets.bottom) }]}>
+          {/* Each button lives in a flex:1 wrapper — never use fullWidth inside a row */}
+          <View style={styles.devBtnWrapper}>
+            <GameButton label="✓ Correcto" onPress={markCorrect} variant="success" fullWidth />
+          </View>
+          <View style={styles.devBtnWrapper}>
+            <GameButton label="✗ Pasa" onPress={markSkipped} variant="accent" fullWidth />
+          </View>
         </View>
       )}
     </View>
@@ -96,47 +104,25 @@ export default function PlayScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
   },
   scoreText: {
-    ...typography.timer,
-    color: colors.correct,
+    fontSize: 28,
+    fontWeight: '700',
   },
-  fallback: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: spacing.xxl,
+  wordArea: {
+    flex: 1,
   },
   devButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    gap: spacing.md,
+    gap: spacing[4],
   },
-  devBtn: {
+  devBtnWrapper: {
+    // Each wrapper takes half the row — GameButton with fullWidth fills it
     flex: 1,
-    paddingVertical: spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  correctBtn: {
-    backgroundColor: colors.correct,
-  },
-  skipBtn: {
-    backgroundColor: colors.skip,
-  },
-  devBtnText: {
-    ...typography.body,
-    color: colors.text,
-    fontWeight: '700',
   },
 });
