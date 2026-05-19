@@ -31,7 +31,7 @@ export default function HomeScreen() {
   return (
     <ScreenContainer scrollable style={styles.container}>
       <View style={styles.header}>
-        <Text variant="heading1" color={theme.colors.primary} align="center">
+        <Text variant="title" color={theme.colors.primary} align="center">
           Adivínale
         </Text>
         <Text variant="body" color={theme.colors.onSurfaceSecondary} align="center">

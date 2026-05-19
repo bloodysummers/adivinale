@@ -10,6 +10,12 @@ jest.mock('../../theme/ThemeProvider', () => ({
   useTheme: () => ({
     theme: {
       colors: { onPrimary: '#fff', success: '#4ECDC4', accent: '#FF6B6B', primary: '#5B4FE8' },
+      typography: {
+        fontSize: { xs: 11, sm: 13, md: 15, lg: 17, xl: 20, '2xl': 24, '3xl': 30, '4xl': 38 },
+        fontFamily: { display: 'TitanOne_400Regular', body: 'Nunito_400Regular', wordDisplay: 'Nunito_900Black' },
+        fontWeight: { regular: '400', medium: '500', semibold: '600', bold: '700', extrabold: '800' },
+        lineHeight: { tight: 1.2, normal: 1.5, relaxed: 1.75 },
+      },
       getShadow: () => ({ elevation: 8 }),
     },
     colorScheme: 'light',

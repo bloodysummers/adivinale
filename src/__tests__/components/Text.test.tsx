@@ -5,9 +5,12 @@ import { Text } from '../../components/Text';
 jest.mock('../../theme/ThemeProvider', () => ({
   useTheme: () => ({
     theme: {
-      colors: {
-        onBackground: '#1A1730',
-        onSurfaceSecondary: '#6B6490',
+      colors: { onBackground: '#1A1730', onSurfaceSecondary: '#6B6490' },
+      typography: {
+        fontSize: { xs: 11, sm: 13, md: 15, lg: 17, xl: 20, '2xl': 24, '3xl': 30, '4xl': 38 },
+        fontFamily: { display: 'TitanOne_400Regular', body: 'Nunito_400Regular', wordDisplay: 'Nunito_900Black' },
+        fontWeight: { regular: '400', medium: '500', semibold: '600', bold: '700', extrabold: '800' },
+        lineHeight: { tight: 1.2, normal: 1.5, relaxed: 1.75 },
       },
     },
     colorScheme: 'light',
@@ -29,13 +32,13 @@ describe('Text', () => {
     expect(flatStyle.fontSize).toBe(38);
   });
 
-  it('heading1 tiene fontWeight extrabold', () => {
+  it('heading1 usa fontFamily body (Nunito)', () => {
     const { getByText } = render(<Text variant="heading1">Título</Text>);
     const el = getByText('Título');
     const flatStyle = Array.isArray(el.props.style)
       ? Object.assign({}, ...el.props.style.filter(Boolean))
       : el.props.style ?? {};
-    expect(flatStyle.fontWeight).toBe('800');
+    expect(flatStyle.fontFamily).toBe('Nunito_400Regular');
   });
 
   it('caption usa color onSurfaceSecondary por defecto', () => {

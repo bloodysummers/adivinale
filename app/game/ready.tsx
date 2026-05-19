@@ -9,7 +9,7 @@ import { useWords } from '../../src/hooks/useWords';
 import { useLandscape } from '../../src/hooks/useLandscape';
 import { playCounter } from '../../src/utils/audio';
 import { Text } from '../../src/components/Text';
-import { gradients, spacing, typography } from '../../src/utils/theme';
+import { gradients, spacing } from '../../src/utils/theme';
 
 const STEPS = ['3', '2', '1', '¡Ya!'];
 
@@ -89,7 +89,7 @@ export default function ReadyScreen() {
             <Text variant="label" color="rgba(255,255,255,0.85)">{category.name}</Text>
           </View>
 
-          <Text style={styles.countdown}>{STEPS[step]}</Text>
+          <Text variant="countdown" color="#fff">{STEPS[step]}</Text>
 
           <Text variant="bodySmall" color="rgba(255,255,255,0.7)" align="center">
             {countdownDone && isLoading ? 'Cargando palabras…' : 'Pon el teléfono en tu frente'}
@@ -117,11 +117,5 @@ const styles = StyleSheet.create({
   emoji: {
     fontSize: 56,
     lineHeight: 68,
-  },
-  countdown: {
-    fontSize: 96,
-    fontWeight: typography.fontWeight.extrabold,
-    color: '#fff',
-    lineHeight: 108,
   },
 });

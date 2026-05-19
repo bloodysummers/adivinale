@@ -78,7 +78,7 @@ export default function PlayScreen() {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={[styles.topBar, { paddingHorizontal: hPad, paddingTop: topPad }]}>
         <Timer timeLeft={timeLeft} />
-        <Text style={[styles.scoreText, { color: theme.colors.success }]}>✓ {score}</Text>
+        <Text variant="heading2" color={theme.colors.success}>✓ {score}</Text>
       </View>
 
       {/* WordDisplay takes all remaining vertical space */}
@@ -109,10 +109,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  scoreText: {
-    fontSize: 28,
-    fontWeight: '700',
   },
   wordArea: {
     flex: 1,

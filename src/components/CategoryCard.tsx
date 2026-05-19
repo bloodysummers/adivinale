@@ -3,7 +3,8 @@ import { Animated, Platform, Pressable, StyleSheet, StyleProp, View, ViewStyle }
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Category } from '../types';
 import { Text } from './Text';
-import { radii, spacing, typography } from '../utils/theme';
+import { useTheme } from '../theme/ThemeProvider';
+import { radii, spacing } from '../utils/theme';
 
 const CARD_GRADIENTS: [string, string][] = [
   ['#5B4FE8', '#8B70F8'],
@@ -35,6 +36,11 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, onPress, style }: CategoryCardProps) {
+  const { theme } = useTheme();
+  const { fontSize, lineHeight } = theme.typography;
+  // minHeight = 2 lines of the button variant (fontSize.lg × lineHeight.normal × 2)
+  const nameMinHeight = fontSize.lg * lineHeight.normal * 2;
+
   const idx = pickIndex(category.id);
   const gradient = CARD_GRADIENTS[idx];
   const edgeColor = CARD_EDGES[idx];
@@ -90,14 +96,11 @@ export function CategoryCard({ category, onPress, style }: CategoryCardProps) {
           <View style={styles.emojiWrapper}>
             <Text style={styles.emoji}>{category.emoji}</Text>
           </View>
-          <Text
-            variant="label"
-            color="#fff"
-            align="center"
-            style={styles.name}
-          >
-            {category.name}
-          </Text>
+          <View style={[styles.nameContainer, { minHeight: nameMinHeight }]}>
+            <Text variant="button" color="#fff" align="center" style={styles.name}>
+              {category.name}
+            </Text>
+          </View>
         </LinearGradient>
       </Pressable>
     </Animated.View>
@@ -157,8 +160,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     lineHeight: 34,
   },
+  nameContainer: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   name: {
-    fontWeight: typography.fontWeight.bold,
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,

@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   icon: {
-    fontWeight: '700',
     width: 20,
     textAlign: 'center',
   },

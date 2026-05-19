@@ -4,12 +4,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeProvider';
-import { radii, spacing, typography, gradients } from '../utils/theme';
+import { Text } from './Text';
+import { radii, spacing, gradients } from '../utils/theme';
 
 type Variant = 'primary' | 'secondary' | 'success' | 'accent';
 type Size = 'sm' | 'md' | 'lg';
@@ -22,12 +22,6 @@ interface GameButtonProps {
   fullWidth?: boolean;
   size?: Size;
 }
-
-const sizeStyles: Record<Size, { paddingVertical: number; paddingHorizontal: number; fontSize: number }> = {
-  sm: { paddingVertical: spacing[2], paddingHorizontal: spacing[4], fontSize: typography.fontSize.sm },
-  md: { paddingVertical: spacing[3], paddingHorizontal: spacing[6], fontSize: typography.fontSize.lg },
-  lg: { paddingVertical: spacing[4], paddingHorizontal: spacing[8], fontSize: typography.fontSize.xl },
-};
 
 const variantGradients: Record<Variant, string[]> = {
   primary: gradients.primary,
@@ -55,6 +49,19 @@ export function GameButton({
   size = 'md',
 }: GameButtonProps) {
   const { theme } = useTheme();
+
+  const paddingMap = {
+    sm: { paddingVertical: spacing[2], paddingHorizontal: spacing[4] },
+    md: { paddingVertical: spacing[3], paddingHorizontal: spacing[6] },
+    lg: { paddingVertical: spacing[4], paddingHorizontal: spacing[8] },
+  };
+
+  const textVariantMap = {
+    sm: 'buttonSm',
+    md: 'button',
+    lg: 'buttonLg',
+  } as const;
+
   const scale = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
 
@@ -72,7 +79,7 @@ export function GameButton({
     ]).start();
   }
 
-  const { paddingVertical, paddingHorizontal, fontSize } = sizeStyles[size];
+  const { paddingVertical, paddingHorizontal } = paddingMap[size];
   const colors = variantGradients[variant];
   const edgeColor = variantEdges[variant];
 
@@ -108,7 +115,7 @@ export function GameButton({
         >
           {/* Top sheen */}
           <View style={styles.sheen} />
-          <Text style={[styles.label, { fontSize, color: theme.colors.onPrimary }]}>
+          <Text variant={textVariantMap[size]} color={theme.colors.onPrimary} style={styles.label}>
             {label}
           </Text>
         </LinearGradient>
@@ -156,7 +163,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)',
   },
   label: {
-    fontWeight: typography.fontWeight.bold,
     letterSpacing: 0.3,
   },
   disabled: {

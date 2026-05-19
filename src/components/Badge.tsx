@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { radii, spacing, typography } from '../utils/theme';
+import { Text } from './Text';
+import { radii, spacing } from '../utils/theme';
 
 type BadgeColor = 'primary' | 'success' | 'accent' | 'neutral';
 type BadgeSize = 'sm' | 'md';
@@ -37,13 +38,8 @@ export function Badge({ label, color = 'primary', size = 'md' }: BadgeProps) {
       ]}
     >
       <Text
-        style={[
-          styles.label,
-          {
-            color: resolvedColor,
-            fontSize: isSm ? typography.fontSize.xs : typography.fontSize.sm,
-          },
-        ]}
+        variant={isSm ? 'caption' : 'label'}
+        color={resolvedColor}
       >
         {label}
       </Text>
@@ -55,8 +51,5 @@ const styles = StyleSheet.create({
   badge: {
     borderRadius: radii.full,
     alignSelf: 'flex-start',
-  },
-  label: {
-    fontWeight: typography.fontWeight.semibold,
   },
 });

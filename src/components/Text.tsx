@@ -1,14 +1,8 @@
 import React from 'react';
-import {
-  Text as RNText,
-  StyleProp,
-  StyleSheet,
-  TextStyle,
-} from 'react-native';
+import { Text as RNText, StyleProp, TextStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { typography } from '../utils/theme';
 
-type Variant = 'heading1' | 'heading2' | 'heading3' | 'body' | 'bodySmall' | 'label' | 'caption';
+type Variant = 'heading1' | 'heading2' | 'heading3' | 'body' | 'bodySmall' | 'label' | 'caption' | 'button' | 'buttonSm' | 'buttonLg' | 'title' | 'countdown' | 'wordDisplay';
 
 interface TextProps {
   children: React.ReactNode;
@@ -22,18 +16,33 @@ interface TextProps {
 
 export function Text({ children, variant = 'body', color, align, style, numberOfLines, adjustsFontSizeToFit }: TextProps) {
   const { theme } = useTheme();
+  const { fontSize, fontFamily, lineHeight } = theme.typography;
 
   const isCaption = variant === 'caption';
   const resolvedColor = color ?? (isCaption ? theme.colors.onSurfaceSecondary : theme.colors.onBackground);
 
+  // fontWeight is intentionally omitted — React Native cannot switch weights within a single
+  // loaded font file (Nunito_400Regular). Size alone carries the typographic hierarchy here.
+  const variantStyle: TextStyle = ({
+    heading1:  { fontFamily: fontFamily.body, fontSize: fontSize['4xl'], lineHeight: fontSize['4xl'] * lineHeight.tight },
+    heading2:  { fontFamily: fontFamily.body, fontSize: fontSize['3xl'], lineHeight: fontSize['3xl'] * lineHeight.tight },
+    heading3:  { fontFamily: fontFamily.body, fontSize: fontSize['2xl'], lineHeight: fontSize['2xl'] * lineHeight.tight },
+    body:      { fontFamily: fontFamily.body, fontSize: fontSize.md,     lineHeight: fontSize.md    * lineHeight.normal },
+    bodySmall: { fontFamily: fontFamily.body, fontSize: fontSize.sm,     lineHeight: fontSize.sm    * lineHeight.normal },
+    label:     { fontFamily: fontFamily.body, fontSize: fontSize.sm,     lineHeight: fontSize.sm    * lineHeight.normal },
+    caption:   { fontFamily: fontFamily.body, fontSize: fontSize.xs,     lineHeight: fontSize.xs    * lineHeight.normal },
+    button:      { fontFamily: fontFamily.display, fontSize: fontSize.lg,  lineHeight: fontSize.lg    * lineHeight.normal },
+    buttonSm:    { fontFamily: fontFamily.display, fontSize: fontSize.sm,  lineHeight: fontSize.sm    * lineHeight.normal },
+    buttonLg:    { fontFamily: fontFamily.display, fontSize: fontSize.xl,  lineHeight: fontSize.xl    * lineHeight.normal },
+    title:       { fontFamily: fontFamily.display, fontSize: fontSize['4xl'], lineHeight: fontSize['4xl'] * lineHeight.tight },
+    countdown:   { fontFamily: fontFamily.display, fontSize: fontSize['6xl'], lineHeight: fontSize['6xl'] * lineHeight.tight },
+    // No lineHeight — required so adjustsFontSizeToFit can shrink the font freely
+    wordDisplay: { fontFamily: fontFamily.wordDisplay, fontSize: fontSize['4xl'], letterSpacing: 0.5 },
+  } as const)[variant];
+
   return (
     <RNText
-      style={[
-        variantStyles[variant],
-        { color: resolvedColor },
-        align != null && { textAlign: align },
-        style,
-      ]}
+      style={[variantStyle, { color: resolvedColor }, align != null && { textAlign: align }, style]}
       numberOfLines={numberOfLines}
       adjustsFontSizeToFit={adjustsFontSizeToFit}
     >
@@ -41,41 +50,3 @@ export function Text({ children, variant = 'body', color, align, style, numberOf
     </RNText>
   );
 }
-
-const variantStyles = StyleSheet.create({
-  heading1: {
-    fontSize: typography.fontSize['4xl'],
-    fontWeight: typography.fontWeight.extrabold,
-    lineHeight: typography.fontSize['4xl'] * typography.lineHeight.tight,
-  },
-  heading2: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: typography.fontSize['3xl'] * typography.lineHeight.tight,
-  },
-  heading3: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    lineHeight: typography.fontSize['2xl'] * typography.lineHeight.tight,
-  },
-  body: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.regular,
-    lineHeight: typography.fontSize.md * typography.lineHeight.normal,
-  },
-  bodySmall: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.regular,
-    lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semibold,
-    lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
-  },
-  caption: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.regular,
-    lineHeight: typography.fontSize.xs * typography.lineHeight.normal,
-  },
-});

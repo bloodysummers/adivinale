@@ -44,8 +44,9 @@ export type Colors = typeof lightColors;
 
 export const typography = {
   fontFamily: {
-    heading: undefined as string | undefined,
-    body: undefined as string | undefined,
+    display: 'TitanOne_400Regular',
+    body: 'Nunito_400Regular',
+    wordDisplay: 'Nunito_900Black',
   },
   fontSize: {
     xs: 11,
@@ -56,6 +57,7 @@ export const typography = {
     '2xl': 24,
     '3xl': 30,
     '4xl': 38,
+    '6xl': 96,
   },
   fontWeight: {
     regular: '400' as const,
@@ -99,7 +101,7 @@ export const radii = {
 // ─── Gradients ───────────────────────────────────────────────────────────────
 
 export const gradients = {
-  primary: ['#5B4FE8', '#8B70F8'] as string[],
+  primary: ['#b4aeeb', '#8B70F8'] as string[],
   success: ['#4ECDC4', '#2EB890'] as string[],
   accent: ['#FF8C42', '#FF6B6B'] as string[],
   background: {
@@ -130,6 +132,26 @@ export function getShadow(level: ShadowLevel) {
     shadowOffset: { width: 0, height: cfg.offsetY },
     shadowOpacity: cfg.opacity,
     shadowRadius: cfg.radius,
+  };
+}
+
+// ─── Scaled typography ───────────────────────────────────────────────────────
+
+export function scaleTypography(scale: number): typeof typography {
+  const fs = typography.fontSize;
+  return {
+    ...typography,
+    fontSize: {
+      xs:    Math.round(fs.xs    * scale),
+      sm:    Math.round(fs.sm    * scale),
+      md:    Math.round(fs.md    * scale),
+      lg:    Math.round(fs.lg    * scale),
+      xl:    Math.round(fs.xl    * scale),
+      '2xl': Math.round(fs['2xl'] * scale),
+      '3xl': Math.round(fs['3xl'] * scale),
+      '4xl': Math.round(fs['4xl'] * scale),
+      '6xl': Math.round(fs['6xl'] * scale),
+    },
   };
 }
 

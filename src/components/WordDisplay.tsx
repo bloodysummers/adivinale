@@ -1,7 +1,7 @@
-import { StyleSheet, Text as RNText, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { Text } from './Text';
-import { spacing, typography } from '../utils/theme';
+import { spacing } from '../utils/theme';
 
 interface WordDisplayProps {
   word: string;
@@ -14,17 +14,18 @@ export function WordDisplay({ word, subtext }: WordDisplayProps) {
   return (
     <View style={styles.container}>
       {/*
-        Uses RN's native Text to avoid the design-system Text component adding a
-        body-variant lineHeight (22.5) that would be smaller than the fontSize (38+),
-        clipping characters from top and bottom.
+        variant="wordDisplay" has no lineHeight so adjustsFontSizeToFit can shrink freely.
+        A fixed lineHeight clips text when the font is large or leaves excess space when shrunk.
       */}
-      <RNText
-        style={[styles.word, { color: theme.colors.onBackground }]}
+      <Text
+        variant="wordDisplay"
+        color={theme.colors.onBackground}
+        align="center"
         adjustsFontSizeToFit
         numberOfLines={3}
       >
         {word}
-      </RNText>
+      </Text>
       {subtext ? (
         <Text variant="bodySmall" color={theme.colors.onSurfaceSecondary} align="center">
           {subtext}
@@ -39,18 +40,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // Generous vertical padding so the word never touches topBar or devButtons
     paddingVertical: spacing[6],
     paddingHorizontal: spacing[8],
     gap: spacing[2],
-  },
-  word: {
-    fontSize: typography.fontSize['4xl'],
-    fontWeight: typography.fontWeight.extrabold,
-    textAlign: 'center',
-    letterSpacing: 0.5,
-    // No lineHeight — let RN compute the natural leading.
-    // A fixed lineHeight would stay large when adjustsFontSizeToFit shrinks the font,
-    // or stay small when the font is large, causing clipping either way.
   },
 });
