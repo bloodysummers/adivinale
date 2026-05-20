@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameStore } from '../../src/store/gameStore';
 import { useAccelerometer } from '../../src/hooks/useAccelerometer';
+import { useCalibration } from '../../src/hooks/useCalibration';
 import { useGameTimer } from '../../src/hooks/useGameTimer';
 import { useLandscape } from '../../src/hooks/useLandscape';
 import { playSkip, playSuccess } from '../../src/utils/audio';
@@ -24,6 +25,8 @@ export default function PlayScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { words, currentIndex, score, status, markCorrect, markSkipped, endRound } = useGameStore((s) => s);
+
+  const { threshold } = useCalibration();
 
   const handleExpire = useCallback(() => endRound(), [endRound]);
 
@@ -50,7 +53,7 @@ export default function PlayScreen() {
     [markCorrect, markSkipped]
   );
 
-  useAccelerometer({ onTilt: handleTilt, enabled: status === 'playing' });
+  useAccelerometer({ onTilt: handleTilt, enabled: status === 'playing', threshold });
 
   useEffect(() => {
     if (status === 'finished' || timeLeft === 0) {

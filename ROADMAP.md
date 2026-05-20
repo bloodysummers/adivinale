@@ -11,9 +11,9 @@
 
 ## Gameplay
 
-- [ ] **Calibración de giro** — Pantalla o flujo para calibrar el acelerómetro antes de iniciar la ronda. Permite ajustar el umbral de inclinación según el dispositivo y cómo cada jugador sostiene el teléfono.
+- [x] **Calibración de giro** — Pantalla o flujo para calibrar el acelerómetro antes de iniciar la ronda. Permite ajustar el umbral de inclinación según el dispositivo y cómo cada jugador sostiene el teléfono.
 - [ ] **PVP mode** — Modo multijugador por turnos dentro de una misma sesión: varios jugadores se pasan el teléfono, cada uno juega su ronda y al final se comparan puntajes.
-- [ ] **Implementar submit de respuestas** — Formulario para permitir al usuario enviar sugerencias de palabras o categorías directamente desde la app. Requiere backend para recibir y almacenar las sugerencias.
+- [x] **Implementar submit de respuestas** — Formulario para permitir al usuario enviar sugerencias de palabras o categorías directamente desde la app. Requiere backend para recibir y almacenar las sugerencias.
 
 ## Contenido
 

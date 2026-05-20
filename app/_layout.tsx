@@ -4,32 +4,40 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { TitanOne_400Regular } from '@expo-google-fonts/titan-one';
 import { Nunito_400Regular, Nunito_900Black } from '@expo-google-fonts/nunito';
-import { ThemeProvider } from '../src/theme/ThemeProvider';
+import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export default function RootLayout() {
+function AppShell() {
   const [fontsLoaded, fontError] = useFonts({
     TitanOne_400Regular,
     Nunito_400Regular,
     Nunito_900Black,
   });
+  const { themeLoaded } = useTheme();
+
+  const ready = (fontsLoaded || !!fontError) && themeLoaded;
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [fontsLoaded, fontError]);
+    if (ready) SplashScreen.hideAsync().catch(() => {});
+  }, [ready]);
 
-  // fontError: carga de fuentes falló — mostramos la app con fuentes del sistema
-  if (!fontsLoaded && !fontError) return null;
+  if (!ready) return null;
 
   return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="game" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="submit-answer" />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <ThemeProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="game" />
-      </Stack>
+      <AppShell />
     </ThemeProvider>
   );
 }

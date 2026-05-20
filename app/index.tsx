@@ -1,9 +1,11 @@
-import { ActivityIndicator, FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useCategories } from '../src/hooks/useCategories';
 import { CategoryCard } from '../src/components/CategoryCard';
 import { Text } from '../src/components/Text';
 import { ScreenContainer } from '../src/components/ScreenContainer';
+import { Drawer } from '../src/components/Drawer';
 import { useGameStore } from '../src/store/gameStore';
 import { useTheme } from '../src/theme/ThemeProvider';
 import type { Category } from '../src/types';
@@ -17,6 +19,7 @@ export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const resetRound = useGameStore((s) => s.resetRound);
   const { data: categories, error, isLoading } = useCategories();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isLandscape = width > height;
   const numColumns = isLandscape ? 3 : 2;
@@ -29,8 +32,18 @@ export default function HomeScreen() {
   }
 
   return (
+    <>
     <ScreenContainer scrollable style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => setDrawerOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir menú"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Text variant="body" color={theme.colors.onBackground} style={styles.menuIcon}>☰</Text>
+        </TouchableOpacity>
         <Text variant="title" color={theme.colors.primary} align="center">
           Adivínale
         </Text>
@@ -70,6 +83,8 @@ export default function HomeScreen() {
         />
       )}
     </ScreenContainer>
+    <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+    </>
   );
 }
 
@@ -80,6 +95,17 @@ const styles = StyleSheet.create({
   header: {
     gap: spacing[2],
     marginBottom: spacing[6],
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 10,
+    padding: spacing[2],
+  },
+  menuIcon: {
+    fontSize: 22,
+    lineHeight: 28,
   },
   loader: {
     marginTop: spacing[10],

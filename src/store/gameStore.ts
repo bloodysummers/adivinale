@@ -3,6 +3,7 @@ import type { Category, RoundWord, Word } from '../types';
 import { shuffle } from '../utils/shuffle';
 
 export type GameStatus = 'idle' | 'countdown' | 'playing' | 'finished';
+export type GameMode = 'clasico' | 'equipos';
 
 interface GameState {
   category: Category | null;
@@ -11,6 +12,8 @@ interface GameState {
   score: number;
   status: GameStatus;
   playedWords: RoundWord[];
+  gameMode: GameMode;
+  setGameMode: (mode: GameMode) => void;
   startRound: (category: Category, words: Word[]) => void;
   markCorrect: () => void;
   markSkipped: () => void;
@@ -25,6 +28,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   score: 0,
   status: 'idle',
   playedWords: [],
+  gameMode: 'clasico',
+  setGameMode: (mode) => set({ gameMode: mode }),
 
   startRound: (category, words) => {
     set({

@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { Accelerometer } from 'expo-sensors';
 import {
   CORRECT_THRESHOLD,
-  SKIP_THRESHOLD,
   HOLD_DURATION_MS,
   DEBOUNCE_MS,
 } from '../utils/accelerometer';
@@ -12,9 +11,10 @@ export type TiltDirection = 'up' | 'down';
 interface UseAccelerometerOptions {
   onTilt: (direction: TiltDirection) => void;
   enabled?: boolean;
+  threshold?: number;
 }
 
-export function useAccelerometer({ onTilt, enabled = true }: UseAccelerometerOptions) {
+export function useAccelerometer({ onTilt, enabled = true, threshold = CORRECT_THRESHOLD }: UseAccelerometerOptions) {
   const holdStartRef = useRef<number | null>(null);
   const holdDirectionRef = useRef<TiltDirection | null>(null);
   const lastTiltAtRef = useRef<number>(0);
@@ -28,8 +28,8 @@ export function useAccelerometer({ onTilt, enabled = true }: UseAccelerometerOpt
       const now = Date.now();
 
       let currentDirection: TiltDirection | null = null;
-      if (z > CORRECT_THRESHOLD) currentDirection = 'up';
-      else if (z < SKIP_THRESHOLD) currentDirection = 'down';
+      if (z > threshold) currentDirection = 'up';
+      else if (z < -threshold) currentDirection = 'down';
 
       if (currentDirection === null) {
         holdStartRef.current = null;
@@ -58,5 +58,5 @@ export function useAccelerometer({ onTilt, enabled = true }: UseAccelerometerOpt
     });
 
     return () => subscription.remove();
-  }, [enabled, onTilt]);
+  }, [enabled, onTilt, threshold]);
 }
