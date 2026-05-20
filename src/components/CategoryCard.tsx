@@ -32,10 +32,11 @@ function pickIndex(id: string): number {
 interface CategoryCardProps {
   category: Category;
   onPress: (category: Category) => void;
+  offlineAvailable?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-export function CategoryCard({ category, onPress, style }: CategoryCardProps) {
+export function CategoryCard({ category, onPress, offlineAvailable = false, style }: CategoryCardProps) {
   const { theme } = useTheme();
   const { fontSize, lineHeight } = theme.typography;
   // minHeight = 2 lines of the button variant (fontSize.lg × lineHeight.normal × 2)
@@ -92,6 +93,12 @@ export function CategoryCard({ category, onPress, style }: CategoryCardProps) {
         >
           {/* Top sheen for light refraction */}
           <View style={styles.sheen} />
+
+          {offlineAvailable && (
+            <View style={styles.offlineBadge}>
+              <Text style={styles.offlineIcon}>📥</Text>
+            </View>
+          )}
 
           <View style={styles.emojiWrapper}>
             <Text style={styles.emoji}>{category.emoji}</Text>
@@ -169,5 +176,20 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+  },
+  offlineBadge: {
+    position: 'absolute',
+    top: spacing[2],
+    right: spacing[2],
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    borderRadius: radii.full,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  offlineIcon: {
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

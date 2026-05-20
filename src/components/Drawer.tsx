@@ -3,12 +3,14 @@ import {
   Animated,
   BackHandler,
   Pressable,
+  ScrollView,
   StyleSheet,
   Switch,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
 import { useGameStore } from '../store/gameStore';
 import type { GameMode } from '../store/gameStore';
@@ -26,6 +28,7 @@ interface DrawerProps {
 export function Drawer({ isOpen, onClose }: DrawerProps) {
   const { theme } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const gameMode = useGameStore((s) => s.gameMode);
   const setGameMode = useGameStore((s) => s.setGameMode);
 
@@ -94,48 +97,56 @@ export function Drawer({ isOpen, onClose }: DrawerProps) {
         ]}
         accessibilityViewIsModal={isOpen}
       >
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
+        {/* Header — fixed, not scrolled */}
+        <View style={[styles.header, { paddingTop: Math.max(spacing[6], insets.top + spacing[2]), borderBottomColor: theme.colors.border }]}>
           <Text variant="heading3" color={theme.colors.primary}>Menú</Text>
         </View>
 
-        {/* Game mode section */}
-        <View style={styles.section}>
-          <Text variant="label" color={theme.colors.onSurfaceSecondary} style={styles.sectionLabel}>
-            MODO DE JUEGO
-          </Text>
+        {/* Scrollable body */}
+        <ScrollView
+          style={styles.scrollBody}
+          contentContainerStyle={{ paddingBottom: Math.max(spacing[6], insets.bottom + spacing[2]) }}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {/* Game mode section */}
+          <View style={styles.section}>
+            <Text variant="label" color={theme.colors.onSurfaceSecondary} style={styles.sectionLabel}>
+              MODO DE JUEGO
+            </Text>
 
-          <ModeRow
-            label="Clásico"
-            active={gameMode === 'clasico'}
-            onPress={() => setGameMode('clasico')}
-            theme={theme}
-          />
-          <ModeRow
-            label="Equipos"
-            active={gameMode === 'equipos'}
-            onPress={() => setGameMode('equipos')}
-            theme={theme}
-          />
-        </View>
+            <ModeRow
+              label="Clásico"
+              active={gameMode === 'clasico'}
+              onPress={() => setGameMode('clasico')}
+              theme={theme}
+            />
+            <ModeRow
+              label="Equipos"
+              active={gameMode === 'equipos'}
+              onPress={() => setGameMode('equipos')}
+              theme={theme}
+            />
+          </View>
 
-        <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
 
-        {/* Navigation section */}
-        <View style={styles.section}>
-          <NavRow
-            icon="⚙️"
-            label="Configuración"
-            onPress={() => navigate('/settings')}
-            theme={theme}
-          />
-          <NavRow
-            icon="💡"
-            label="Sugerir respuesta"
-            onPress={() => navigate('/submit-answer')}
-            theme={theme}
-          />
-        </View>
+          {/* Navigation section */}
+          <View style={styles.section}>
+            <NavRow
+              icon="⚙️"
+              label="Configuración"
+              onPress={() => navigate('/settings')}
+              theme={theme}
+            />
+            <NavRow
+              icon="💡"
+              label="Sugerir respuesta"
+              onPress={() => navigate('/submit-answer')}
+              theme={theme}
+            />
+          </View>
+        </ScrollView>
       </Animated.View>
     </View>
   );
@@ -206,10 +217,12 @@ const styles = StyleSheet.create({
     elevation: 16,
   },
   header: {
-    paddingTop: spacing[12],
     paddingBottom: spacing[4],
     paddingHorizontal: spacing[6],
     borderBottomWidth: 1,
+  },
+  scrollBody: {
+    flex: 1,
   },
   section: {
     paddingVertical: spacing[3],

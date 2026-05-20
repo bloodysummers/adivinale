@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useCategories } from '../src/hooks/useCategories';
+import { useOfflineMode } from '../src/hooks/useOfflineMode';
+import { hasCachedWords } from '../src/utils/cache';
 import { CategoryCard } from '../src/components/CategoryCard';
 import { Text } from '../src/components/Text';
 import { ScreenContainer } from '../src/components/ScreenContainer';
@@ -19,10 +21,30 @@ export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const resetRound = useGameStore((s) => s.resetRound);
   const { data: categories, error, isLoading } = useCategories();
+  const { isOffline } = useOfflineMode();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [visibleCategories, setVisibleCategories] = useState<Category[] | null>(null);
 
   const isLandscape = width > height;
   const numColumns = isLandscape ? 3 : 2;
+
+  // Filter categories by offline availability when in offline mode
+  useEffect(() => {
+    if (!categories) {
+      setVisibleCategories(null);
+      return;
+    }
+    if (!isOffline) {
+      setVisibleCategories(categories);
+      return;
+    }
+    let cancelled = false;
+    Promise.all(categories.map((c) => hasCachedWords(c.id).then((has) => ({ cat: c, has }))))
+      .then((results) => {
+        if (!cancelled) setVisibleCategories(results.filter((r) => r.has).map((r) => r.cat));
+      });
+    return () => { cancelled = true; };
+  }, [categories, isOffline]);
 
   function handleSelectCategory(category: Category) {
     resetRound();
@@ -30,6 +52,8 @@ export default function HomeScreen() {
       `/game/ready?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}&categoryEmoji=${encodeURIComponent(category.emoji)}`
     );
   }
+
+  const showEmptyOffline = isOffline && visibleCategories != null && visibleCategories.length === 0;
 
   return (
     <>
@@ -48,7 +72,7 @@ export default function HomeScreen() {
           Adivínale
         </Text>
         <Text variant="body" color={theme.colors.onSurfaceSecondary} align="center">
-          Elige una categoría
+          {isOffline ? 'Modo offline' : 'Elige una categoría'}
         </Text>
       </View>
 
@@ -62,11 +86,22 @@ export default function HomeScreen() {
         </Text>
       )}
 
-      {categories && (
+      {showEmptyOffline && (
+        <View style={styles.emptyOffline}>
+          <Text variant="body" align="center" color={theme.colors.onSurfaceSecondary}>
+            📵
+          </Text>
+          <Text variant="body" align="center" color={theme.colors.onSurfaceSecondary}>
+            No hay categorías disponibles offline.{'\n'}Juega una ronda conectado para guardar palabras.
+          </Text>
+        </View>
+      )}
+
+      {visibleCategories && visibleCategories.length > 0 && (
         <FlatList
           // key forces remount when column count changes (FlatList requires this)
           key={numColumns}
-          data={categories}
+          data={visibleCategories}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
           columnWrapperStyle={styles.row}
@@ -74,6 +109,7 @@ export default function HomeScreen() {
             <CategoryCard
               category={item}
               onPress={handleSelectCategory}
+              offlineAvailable={isOffline}
               style={styles.card}
             />
           )}
@@ -112,6 +148,12 @@ const styles = StyleSheet.create({
   },
   error: {
     marginTop: spacing[10],
+  },
+  emptyOffline: {
+    marginTop: spacing[10],
+    alignItems: 'center',
+    gap: spacing[4],
+    paddingHorizontal: spacing[8],
   },
   list: {
     paddingBottom: spacing[10],

@@ -1,10 +1,11 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '../src/components/Text';
 import { useTheme } from '../src/theme/ThemeProvider';
 import { useCalibration, CALIBRATION_MIN, CALIBRATION_MAX } from '../src/hooks/useCalibration';
+import { useOfflineMode } from '../src/hooks/useOfflineMode';
 import { spacing, radii } from '../src/utils/theme';
 
 export default function SettingsScreen() {
@@ -12,6 +13,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { theme, colorScheme, setTheme } = useTheme();
   const { threshold, setThreshold } = useCalibration();
+  const { isOffline, setOffline } = useOfflineMode();
 
   return (
     <View style={[styles.root, { backgroundColor: theme.colors.background, paddingTop: insets.top }]}>
@@ -29,7 +31,7 @@ export default function SettingsScreen() {
         <Text variant="heading3" color={theme.colors.onBackground}>Configuración</Text>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Calibration section */}
         <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
           <Text variant="label" color={theme.colors.onSurfaceSecondary} style={styles.sectionLabel}>
@@ -61,6 +63,27 @@ export default function SettingsScreen() {
           </Text>
         </View>
 
+        {/* Offline mode section */}
+        <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <Text variant="label" color={theme.colors.onSurfaceSecondary} style={styles.sectionLabel}>
+            MODO DE JUEGO
+          </Text>
+          <View style={styles.switchRow}>
+            <View style={styles.switchLabel}>
+              <Text variant="body" color={theme.colors.onBackground}>Offline</Text>
+              <Text variant="bodySmall" color={theme.colors.onSurfaceSecondary}>
+                Juega sin conexión usando las palabras guardadas.
+              </Text>
+            </View>
+            <Switch
+              value={isOffline}
+              onValueChange={setOffline}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primaryLight }}
+              thumbColor={isOffline ? theme.colors.primary : theme.colors.onSurfaceSecondary}
+            />
+          </View>
+        </View>
+
         {/* Theme section */}
         <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
           <Text variant="label" color={theme.colors.onSurfaceSecondary} style={styles.sectionLabel}>
@@ -83,7 +106,7 @@ export default function SettingsScreen() {
             />
           </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -131,9 +154,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     alignSelf: 'flex-start',
   },
+  scrollView: {
+    flex: 1,
+  },
   content: {
     padding: spacing[4],
     gap: spacing[4],
+    paddingBottom: spacing[12],
   },
   card: {
     borderRadius: radii.lg,
@@ -169,5 +196,14 @@ const styles = StyleSheet.create({
   },
   themeEmoji: {
     fontSize: 28,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+  },
+  switchLabel: {
+    flex: 1,
+    gap: spacing[1],
   },
 });

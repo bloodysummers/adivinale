@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +18,9 @@ import { spacing } from '../../src/utils/theme';
 import type { TiltDirection } from '../../src/hooks/useAccelerometer';
 
 const IS_DEV = __DEV__;
+const FLASH_IN_MS = 60;
+const FLASH_OUT_MS = 380;
+const FLASH_OPACITY = 0.45;
 
 export default function PlayScreen() {
   useLandscape();
@@ -27,6 +30,21 @@ export default function PlayScreen() {
   const { words, currentIndex, score, status, markCorrect, markSkipped, endRound } = useGameStore((s) => s);
 
   const { threshold } = useCalibration();
+
+  const flashAnim = useRef(new Animated.Value(0)).current;
+  const flashColorRef = useRef<'success' | 'skip'>('success');
+  const flashAnimRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  const triggerFlash = useCallback((type: 'success' | 'skip') => {
+    flashColorRef.current = type;
+    flashAnimRef.current?.stop();
+    flashAnim.setValue(0);
+    flashAnimRef.current = Animated.sequence([
+      Animated.timing(flashAnim, { toValue: FLASH_OPACITY, duration: FLASH_IN_MS, useNativeDriver: true }),
+      Animated.timing(flashAnim, { toValue: 0, duration: FLASH_OUT_MS, useNativeDriver: true }),
+    ]);
+    flashAnimRef.current.start();
+  }, [flashAnim]);
 
   const handleExpire = useCallback(() => endRound(), [endRound]);
 
@@ -42,15 +60,17 @@ export default function PlayScreen() {
         playSuccess();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success), 120);
+        triggerFlash('success');
         markCorrect();
       } else {
         playSkip();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         setTimeout(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning), 120);
+        triggerFlash('skip');
         markSkipped();
       }
     },
-    [markCorrect, markSkipped]
+    [markCorrect, markSkipped, triggerFlash]
   );
 
   useAccelerometer({ onTilt: handleTilt, enabled: status === 'playing', threshold });
@@ -77,8 +97,16 @@ export default function PlayScreen() {
   const hPad = Math.max(spacing[6], insets.left + spacing[4]);
   const topPad = Math.max(spacing[4], insets.top + spacing[2]);
 
+  const flashColor = flashColorRef.current === 'success' ? theme.colors.success : theme.colors.error;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Colour-pulse overlay — sits above background, below all content */}
+      <Animated.View
+        style={[StyleSheet.absoluteFill, { backgroundColor: flashColor, opacity: flashAnim }]}
+        pointerEvents="none"
+      />
+
       <View style={[styles.topBar, { paddingHorizontal: hPad, paddingTop: topPad }]}>
         <Timer timeLeft={timeLeft} />
         <Text variant="heading2" color={theme.colors.success}>✓ {score}</Text>
@@ -93,10 +121,10 @@ export default function PlayScreen() {
         <View style={[styles.devButtons, { paddingHorizontal: hPad, paddingBottom: Math.max(spacing[4], insets.bottom) }]}>
           {/* Each button lives in a flex:1 wrapper — never use fullWidth inside a row */}
           <View style={styles.devBtnWrapper}>
-            <GameButton label="✓ Correcto" onPress={markCorrect} variant="success" fullWidth />
+            <GameButton label="✓ Correcto" onPress={() => { triggerFlash('success'); markCorrect(); }} variant="success" fullWidth />
           </View>
           <View style={styles.devBtnWrapper}>
-            <GameButton label="✗ Pasa" onPress={markSkipped} variant="accent" fullWidth />
+            <GameButton label="✗ Pasa" onPress={() => { triggerFlash('skip'); markSkipped(); }} variant="accent" fullWidth />
           </View>
         </View>
       )}
